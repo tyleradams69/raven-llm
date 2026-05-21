@@ -1,11 +1,33 @@
 import { describe, expect, it } from "vitest";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { renderVoiceBrief } from "../src/profile.js";
+import { loadEnvFiles } from "../src/env.js";
 import { rankAlpha, scoreAlphaPost } from "../src/scoring.js";
 import { buildRecentAiAlphaQuery, parseXurlSearch } from "../src/x-client.js";
 import { renderReport } from "../src/scan.js";
 import { buildTelegramDigest, sendTelegramMessage } from "../src/telegram.js";
 
 const now = new Date("2026-05-21T12:00:00.000Z");
+
+describe("env loading", () => {
+  it("loads .env.local before scan reads Telegram settings", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "raven-env-"));
+    const previous = process.env.TELEGRAM_ENABLED;
+    delete process.env.TELEGRAM_ENABLED;
+    try {
+      await writeFile(join(dir, ".env.local"), "TELEGRAM_ENABLED=true\n");
+      const loaded = loadEnvFiles(dir);
+      expect(loaded).toContain(".env.local");
+      expect(process.env.TELEGRAM_ENABLED).toBe("true");
+    } finally {
+      if (previous === undefined) delete process.env.TELEGRAM_ENABLED;
+      else process.env.TELEGRAM_ENABLED = previous;
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+});
 
 describe("AI alpha scoring", () => {
   it("promotes fresh primary-lab launch posts to tweet-now", () => {

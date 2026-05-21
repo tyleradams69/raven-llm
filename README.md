@@ -60,6 +60,8 @@ npm run scan
 
 If X auth is not configured, the scan falls back to sample posts so the funnel still works locally.
 
+`npm run scan` automatically loads `.env.local` first, then `.env`. Keep real credentials in `.env.local`, which is ignored by git.
+
 ## Preferred X auth
 
 Use `xurl`, authenticated outside Hermes/agent chat.

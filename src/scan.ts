@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { loadEnvFiles } from "./env.js";
 import { renderVoiceBrief } from "./profile.js";
 import { rankAlpha } from "./scoring.js";
 import { defaultSources, type ScoredAlpha, type XPost } from "./sources.js";
@@ -95,16 +96,18 @@ export function renderReport(items: ScoredAlpha[]) {
   ].join("\n");
 }
 
-export async function runScan(client = makeClient()) {
+export async function runScan(client?: XSearchClient) {
+  loadEnvFiles();
   const limit = Number(env("AI_ALPHA_SCAN_LIMIT", "25"));
   const minScore = Number(env("AI_ALPHA_MIN_SCORE", "60"));
   const handles = seedHandles();
   const query = buildRecentAiAlphaQuery(handles);
+  const searchClient = client ?? makeClient();
   let posts: XPost[];
   let mode = "live";
 
   try {
-    posts = await client.search(query, limit);
+    posts = await searchClient.search(query, limit);
   } catch (error) {
     mode = "sample-fallback";
     posts = fallbackPosts();
