@@ -83,10 +83,11 @@ X_BEARER_TOKEN=your-read-token
 ## Commands
 
 ```bash
-npm run scan     # run one funnel scan
-npm test         # tests
-npm run build    # TypeScript check
-npm run lint     # ESLint
+npm run scan          # run one funnel scan
+npm run telegram:bot  # answer pending Telegram /ideas commands once
+npm test              # tests
+npm run build         # TypeScript check
+npm run lint          # ESLint
 ```
 
 ## Env tuning
@@ -104,6 +105,8 @@ TELEGRAM_CHAT_ID=your-chat-id
 TELEGRAM_MIN_SCORE=70
 TELEGRAM_MAX_ITEMS=5
 TELEGRAM_SEND_SAMPLE_FALLBACK=false
+TELEGRAM_OFFSET_PATH=.data/runs/telegram-offset.json
+TELEGRAM_POLL_TIMEOUT=0
 ```
 
 `AI_ALPHA_MAX_AGE_HOURS=24` keeps Telegram focused on recent signals. Set it to `8` for stricter breaking-news mode, or `0` to disable age filtering.
@@ -137,6 +140,8 @@ TELEGRAM_CHAT_ID=...
 TELEGRAM_MIN_SCORE=70
 TELEGRAM_MAX_ITEMS=5
 TELEGRAM_SEND_SAMPLE_FALLBACK=false
+TELEGRAM_OFFSET_PATH=.data/runs/telegram-offset.json
+TELEGRAM_POLL_TIMEOUT=0
 ```
 
 Then run:
@@ -149,6 +154,26 @@ If high-score signals are found, Telegram receives a compact digest with source 
 
 By default, Telegram only sends live X results. If X API search fails and ravenLLM uses sample fallback data, Telegram stays quiet unless you explicitly set `TELEGRAM_SEND_SAMPLE_FALLBACK=true`.
 
+## Telegram idea bot
+
+The same Telegram bot can also generate on-demand tweet ideas so the account is not only a pure alpha feed.
+
+Send the bot:
+
+```text
+/ideas
+/ideas AI agents
+/ideas open source models
+/help
+```
+
+Then run this locally to answer pending commands:
+
+```bash
+npm run telegram:bot
+```
+
+The command uses Telegram `getUpdates`, replies only to your configured `TELEGRAM_CHAT_ID`, and stores the processed offset at `TELEGRAM_OFFSET_PATH` so it does not answer the same message twice. Schedule `npm run telegram:bot` every minute if you want it to feel automatic.
 
 ## Source strategy
 

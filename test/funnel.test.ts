@@ -8,6 +8,8 @@ import { postAgeHours, scoreAlphaPost } from "../src/scoring.js";
 import { buildAiAlphaQueryPlan, buildBroadAiAlphaQueries, buildRecentAiAlphaQuery, parseXurlSearch } from "../src/x-client.js";
 import { renderReport } from "../src/scan.js";
 import { buildTelegramDigest, sendTelegramMessage } from "../src/telegram.js";
+import { buildBotReply } from "../src/telegram-bot.js";
+import { buildTweetIdeas } from "../src/tweet-ideas.js";
 
 const now = new Date("2026-05-21T12:00:00.000Z");
 
@@ -169,5 +171,22 @@ describe("Telegram digest", () => {
   it("does not send Telegram messages when disabled", async () => {
     const result = await sendTelegramMessage({ enabled: false }, "hello");
     expect(result).toMatchObject({ sent: false, reason: "disabled-or-empty" });
+  });
+});
+
+describe("Telegram tweet idea bot", () => {
+  it("builds evergreen and topic-specific tweet ideas", () => {
+    const evergreen = buildTweetIdeas();
+    const topic = buildTweetIdeas("/ideas AI agents");
+
+    expect(evergreen).toContain("evergreen tweet ideas");
+    expect(topic).toContain("AI agents");
+    expect(topic).toContain("Not pure alpha");
+  });
+
+  it("routes Telegram commands to idea replies", () => {
+    expect(buildBotReply("/help")).toContain("ravenLLM bot commands");
+    expect(buildBotReply("/ideas open source models")).toContain("open source models");
+    expect(buildBotReply("hello")).toContain("Send /ideas");
   });
 });
