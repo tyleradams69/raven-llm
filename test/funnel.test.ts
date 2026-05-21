@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { renderVoiceBrief } from "../src/profile.js";
 import { loadEnvFiles } from "../src/env.js";
-import { rankAlpha, scoreAlphaPost } from "../src/scoring.js";
+import { postAgeHours, scoreAlphaPost } from "../src/scoring.js";
 import { buildAiAlphaQueryPlan, buildBroadAiAlphaQueries, buildRecentAiAlphaQuery, parseXurlSearch } from "../src/x-client.js";
 import { renderReport } from "../src/scan.js";
 import { buildTelegramDigest, sendTelegramMessage } from "../src/telegram.js";
@@ -62,13 +62,34 @@ describe("AI alpha scoring", () => {
     expect(scored.risks.join(" ")).toContain("rumor");
   });
 
-  it("ranks stronger signals first", () => {
-    const ranked = rankAlpha([
-      { id: "weak", authorHandle: "random", text: "AI is cool", createdAt: "2026-05-20T11:00:00.000Z" },
-      { id: "strong", authorHandle: "AnthropicAI", text: "Announcing a new Claude model with better coding, tool use, and reasoning benchmarks.", createdAt: "2026-05-21T11:45:00.000Z", likeCount: 2000, repostCount: 300 },
-    ], { now });
+  it("penalizes crypto/token false positives", () => {
+    const scored = scoreAlphaPost({
+      id: "crypto-ai",
+      authorHandle: "FLOKIARMYKING",
+      text: "Current status of RICE AI: available on Binance Alpha as an early-access token.",
+      createdAt: now.toISOString(),
+      likeCount: 1000,
+      repostCount: 200,
+    }, { now });
 
-    expect(ranked[0].post.id).toBe("strong");
+    expect(scored.score).toBeLessThan(60);
+    expect(scored.risks.join(" ")).toContain("crypto/token false positive");
+  });
+
+  it("penalizes older posts so they do not become tweet-now", () => {
+    const scored = scoreAlphaPost({
+      id: "old-google",
+      authorHandle: "GoogleDeepMind",
+      text: "We’re rolling out 3.5 Flash to everyone in the Gemini app and API for developers.",
+      createdAt: "2026-05-19T12:00:00.000Z",
+      likeCount: 5000,
+      repostCount: 1000,
+      viewCount: 1_000_000,
+    }, { now });
+
+    expect(postAgeHours(scored.post, now)).toBe(48);
+    expect(scored.urgency).toBe("watch");
+    expect(scored.risks.join(" ")).toContain("older signal");
   });
 });
 

@@ -6,6 +6,7 @@ const breakingTerms = ["launch", "released", "announcing", "introducing", "new m
 const researchTerms = ["paper", "arxiv", "research", "eval", "benchmark", "scaling", "training", "inference", "post-training", "rl", "distillation"];
 const productTerms = ["users", "shipping", "app", "feature", "beta", "waitlist", "developer", "sdk", "pricing", "enterprise", "codex", "cursor", "agent", "agents", "workflow"];
 const riskTerms = ["unconfirmed", "leak", "maybe", "heard", "giveaway", "airdrop"];
+const cryptoFalsePositiveTerms = ["binance", "token", "tokens", "coin", "airdrop", "presale", "dex", "degen", "pump", "memecoin", "solana", "contract address", "ca:", "$rice", "$", "alpha section"];
 
 function includesAny(text: string, terms: string[]) {
   const lower = text.toLowerCase();
@@ -21,14 +22,20 @@ function engagementScore(post: XPost) {
   return Math.min(25, Math.log10(1 + likes + reposts * 3 + replies * 2 + quotes * 3 + views / 250) * 8);
 }
 
+export function postAgeHours(post: XPost, now = new Date()) {
+  if (!post.createdAt) return undefined;
+  return Math.max(0, (now.getTime() - new Date(post.createdAt).getTime()) / 3_600_000);
+}
+
 function recencyScore(post: XPost, now = new Date()) {
-  if (!post.createdAt) return 8;
-  const ageHours = Math.max(0, (now.getTime() - new Date(post.createdAt).getTime()) / 3_600_000);
-  if (ageHours <= 1) return 20;
-  if (ageHours <= 3) return 17;
+  const ageHours = postAgeHours(post, now);
+  if (ageHours === undefined) return 4;
+  if (ageHours <= 1) return 22;
+  if (ageHours <= 3) return 18;
   if (ageHours <= 8) return 13;
-  if (ageHours <= 24) return 8;
-  return 2;
+  if (ageHours <= 24) return 6;
+  if (ageHours <= 48) return -12;
+  return -25;
 }
 
 function classify(post: XPost): ScoredAlpha["category"] {
@@ -90,7 +97,9 @@ export function scoreAlphaPost(post: XPost, options: { now?: Date; minScore?: nu
 
   const recency = recencyScore(post, options.now);
   score += recency;
+  const ageHours = postAgeHours(post, options.now);
   if (recency >= 17) reasons.push("fresh post window");
+  if (ageHours !== undefined && ageHours > 24) risks.push(`older signal (${Math.round(ageHours)}h old); use for context, not breaking news`);
 
   const engagement = engagementScore(post);
   score += engagement;
@@ -116,13 +125,24 @@ export function scoreAlphaPost(post: XPost, options: { now?: Date; minScore?: nu
     score -= 18;
     risks.push("rumor/leak language; verify before tweeting");
   }
+  if (includesAny(post.text, cryptoFalsePositiveTerms)) {
+    score -= 45;
+    risks.push("crypto/token false positive; skip unless intentionally covering AI x crypto");
+  }
   if (post.text.length < 35) {
     score -= 8;
     risks.push("low-context post");
   }
 
   score = Math.max(0, Math.min(100, Math.round(score)));
-  const urgency: ScoredAlpha["urgency"] = score >= 78 ? "tweet-now" : score >= (options.minScore ?? 60) ? "draft-today" : "watch";
+  const minScore = options.minScore ?? 60;
+  const isFreshEnoughToTweetNow = ageHours === undefined || ageHours <= 8;
+  const isFreshEnoughForDraft = ageHours === undefined || ageHours <= 24;
+  const urgency: ScoredAlpha["urgency"] = score >= 78 && isFreshEnoughToTweetNow
+    ? "tweet-now"
+    : score >= minScore && isFreshEnoughForDraft
+      ? "draft-today"
+      : "watch";
 
   return {
     post,

@@ -94,6 +94,7 @@ npm run lint     # ESLint
 ```text
 AI_ALPHA_SCAN_LIMIT=25
 AI_ALPHA_MIN_SCORE=60
+AI_ALPHA_MAX_AGE_HOURS=24
 AI_ALPHA_OUTPUT_DIR=.data/runs
 AI_ALPHA_SEED_HANDLES=sama,karpathy,OpenAI,AnthropicAI,GoogleDeepMind,MetaAI,perplexity_ai,huggingface,cursor_ai,swyx
 AI_ALPHA_EXTRA_BROAD_QUERIES="new AI model" "early access" -is:retweet lang:en||"open weights" "just shipped" AI -is:retweet lang:en
@@ -104,6 +105,8 @@ TELEGRAM_MIN_SCORE=70
 TELEGRAM_MAX_ITEMS=5
 TELEGRAM_SEND_SAMPLE_FALLBACK=false
 ```
+
+`AI_ALPHA_MAX_AGE_HOURS=24` keeps Telegram focused on recent signals. Set it to `8` for stricter breaking-news mode, or `0` to disable age filtering.
 
 ## Output
 

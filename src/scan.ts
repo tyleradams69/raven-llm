@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { loadEnvFiles } from "./env.js";
 import { renderVoiceBrief } from "./profile.js";
-import { rankAlpha } from "./scoring.js";
+import { rankAlpha, postAgeHours } from "./scoring.js";
 import { defaultSources, type ScoredAlpha, type XPost } from "./sources.js";
 import { buildTelegramDigest, sendTelegramMessage } from "./telegram.js";
 import { BearerSearchClient, buildAiAlphaQueryPlan, XurlClient, type XSearchClient } from "./x-client.js";
@@ -38,6 +38,14 @@ function uniquePosts(posts: XPost[]) {
 async function searchMany(client: XSearchClient, queries: string[], limit: number) {
   const batches = await Promise.all(queries.map((query) => client.search(query, limit)));
   return uniquePosts(batches.flat());
+}
+
+function filterByMaxAge(posts: XPost[], maxAgeHours: number, now = new Date()) {
+  if (!Number.isFinite(maxAgeHours) || maxAgeHours <= 0) return posts;
+  return posts.filter((post) => {
+    const age = postAgeHours(post, now);
+    return age === undefined || age <= maxAgeHours;
+  });
 }
 
 function makeClient(): XSearchClient {
@@ -123,6 +131,7 @@ export async function runScan(client?: XSearchClient) {
   loadEnvFiles();
   const limit = Number(env("AI_ALPHA_SCAN_LIMIT", "25"));
   const minScore = Number(env("AI_ALPHA_MIN_SCORE", "60"));
+  const maxAgeHours = Number(env("AI_ALPHA_MAX_AGE_HOURS", "24"));
   const handles = seedHandles();
   const queryPlan = buildAiAlphaQueryPlan(handles, extraBroadQueries());
   const query = queryPlan.combinedForReport;
@@ -132,7 +141,7 @@ export async function runScan(client?: XSearchClient) {
   let mode = "live";
 
   try {
-    posts = await searchMany(searchClient, queries, limit);
+    posts = filterByMaxAge(await searchMany(searchClient, queries, limit), maxAgeHours);
   } catch (error) {
     mode = "sample-fallback";
     posts = fallbackPosts();
@@ -146,7 +155,7 @@ export async function runScan(client?: XSearchClient) {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const jsonPath = join(outputDir, `${stamp}.json`);
   const mdPath = join(outputDir, `${stamp}.md`);
-  await writeFile(jsonPath, JSON.stringify({ mode, query, queries, scanned: posts.length, qualified, ranked }, null, 2));
+  await writeFile(jsonPath, JSON.stringify({ mode, query, queries, maxAgeHours, scanned: posts.length, qualified, ranked }, null, 2));
   await writeFile(mdPath, renderReport(qualified.length ? qualified : ranked.slice(0, 10)));
 
   const telegramMinScore = Number(env("TELEGRAM_MIN_SCORE", String(minScore)));
@@ -168,7 +177,7 @@ export async function runScan(client?: XSearchClient) {
     ? telegram
     : { ...telegram, reason: "sample-fallback-not-sent" };
 
-  return { mode, query, queries, scanned: posts.length, qualified: qualified.length, top: ranked[0], jsonPath, mdPath, telegram: telegramResult };
+  return { mode, query, queries, maxAgeHours, scanned: posts.length, qualified: qualified.length, top: ranked[0], jsonPath, mdPath, telegram: telegramResult };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
