@@ -3,6 +3,7 @@ import { renderVoiceBrief } from "../src/profile.js";
 import { rankAlpha, scoreAlphaPost } from "../src/scoring.js";
 import { buildRecentAiAlphaQuery, parseXurlSearch } from "../src/x-client.js";
 import { renderReport } from "../src/scan.js";
+import { buildTelegramDigest, sendTelegramMessage } from "../src/telegram.js";
 
 const now = new Date("2026-05-21T12:00:00.000Z");
 
@@ -89,5 +90,29 @@ describe("report rendering", () => {
     expect(brief).toContain("AI investigative journalist");
     expect(brief).toContain("good morning");
     expect(brief).toContain("giveaway");
+  });
+});
+
+describe("Telegram digest", () => {
+  it("renders high-score Raven signals with draft text", () => {
+    const scored = scoreAlphaPost({
+      id: "tg-1",
+      authorHandle: "OpenAI",
+      text: "Introducing a new AI reasoning API for agents and coding workflows.",
+      createdAt: now.toISOString(),
+      likeCount: 1000,
+      repostCount: 200,
+      url: "https://x.com/OpenAI/status/tg-1",
+    }, { now });
+
+    const digest = buildTelegramDigest([scored], { minScore: 70 });
+    expect(digest).toContain("ravenLLM AI signal digest");
+    expect(digest).toContain("@OpenAI");
+    expect(digest).toContain("Draft:");
+  });
+
+  it("does not send Telegram messages when disabled", async () => {
+    const result = await sendTelegramMessage({ enabled: false }, "hello");
+    expect(result).toMatchObject({ sent: false, reason: "disabled-or-empty" });
   });
 });

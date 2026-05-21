@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { renderVoiceBrief } from "./profile.js";
 import { rankAlpha } from "./scoring.js";
 import { defaultSources, type ScoredAlpha, type XPost } from "./sources.js";
+import { buildTelegramDigest, sendTelegramMessage } from "./telegram.js";
 import { BearerSearchClient, buildRecentAiAlphaQuery, XurlClient, type XSearchClient } from "./x-client.js";
 
 function env(name: string, fallback = "") {
@@ -120,7 +121,21 @@ export async function runScan(client = makeClient()) {
   await writeFile(jsonPath, JSON.stringify({ mode, query, scanned: posts.length, qualified, ranked }, null, 2));
   await writeFile(mdPath, renderReport(qualified.length ? qualified : ranked.slice(0, 10)));
 
-  return { mode, query, scanned: posts.length, qualified: qualified.length, top: ranked[0], jsonPath, mdPath };
+  const telegramMinScore = Number(env("TELEGRAM_MIN_SCORE", String(minScore)));
+  const telegramMaxItems = Number(env("TELEGRAM_MAX_ITEMS", "5"));
+  const telegramDigest = buildTelegramDigest(ranked, {
+    minScore: telegramMinScore,
+    maxItems: telegramMaxItems,
+  });
+  const telegram = await sendTelegramMessage({
+    enabled: env("TELEGRAM_ENABLED", "false").toLowerCase() === "true",
+    botToken: env("TELEGRAM_BOT_TOKEN"),
+    chatId: env("TELEGRAM_CHAT_ID"),
+    minScore: telegramMinScore,
+    maxItems: telegramMaxItems,
+  }, telegramDigest);
+
+  return { mode, query, scanned: posts.length, qualified: qualified.length, top: ranked[0], jsonPath, mdPath, telegram };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

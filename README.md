@@ -27,6 +27,7 @@ This is not an auto-poster. It is a discovery and drafting system. You review be
   - thread hook
   - quote-tweet take
 - Writes Markdown and JSON reports to `.data/runs/`.
+- Optionally sends a Telegram digest with live news + draft angles when high-score signals appear.
 
 ## Voice / content lane
 
@@ -92,6 +93,11 @@ AI_ALPHA_SCAN_LIMIT=25
 AI_ALPHA_MIN_SCORE=60
 AI_ALPHA_OUTPUT_DIR=.data/runs
 AI_ALPHA_SEED_HANDLES=Chrisgpt,sama,karpathy,OpenAI,AnthropicAI,GoogleDeepMind,MetaAI,perplexity_ai,huggingface,cursor_ai,swyx
+TELEGRAM_ENABLED=false
+TELEGRAM_BOT_TOKEN=your-bot-token
+TELEGRAM_CHAT_ID=your-chat-id
+TELEGRAM_MIN_SCORE=70
+TELEGRAM_MAX_ITEMS=5
 ```
 
 ## Output
@@ -104,6 +110,34 @@ Each scan creates:
 ```
 
 The Markdown report is the operator-friendly view. Open the latest `.md` and pick the best draft/angle.
+
+## Telegram alerts
+
+Yes — ravenLLM is designed to be useful as a Telegram alert feed. Enable this only after you have a real X read path (`xurl` or `X_BEARER_TOKEN`) so Telegram receives live signals rather than sample fallback data.
+
+Recommended flow:
+
+1. Create a Telegram bot with `@BotFather`.
+2. Send one message to the bot from your Telegram account.
+3. Get your chat ID using Telegram's `getUpdates` endpoint or a trusted chat-id helper bot.
+4. Put secrets in `.env.local`, not in chat and not in git:
+
+```text
+TELEGRAM_ENABLED=true
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_CHAT_ID=...
+TELEGRAM_MIN_SCORE=70
+TELEGRAM_MAX_ITEMS=5
+```
+
+Then run:
+
+```bash
+npm run scan
+```
+
+If high-score signals are found, Telegram receives a compact digest with source link, reasons, risk flags, and a tweet draft.
+
 
 ## Source strategy
 
