@@ -9,6 +9,12 @@ export type XSearchClient = {
   search(query: string, limit: number): Promise<XPost[]>;
 };
 
+export type SearchQueryPlan = {
+  sourceQuery: string;
+  broadQueries: string[];
+  combinedForReport: string;
+};
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? value as Record<string, unknown> : {};
 }
@@ -80,4 +86,23 @@ export function buildRecentAiAlphaQuery(handles: string[]) {
   const aiTerms = "(AI OR AGI OR LLM OR model OR agents OR inference OR OpenAI OR Anthropic OR DeepMind OR Claude OR GPT OR llama OR multimodal OR reasoning OR Codex OR Cursor)";
   const signalTerms = "(launch OR released OR announcing OR paper OR benchmark OR open-source OR API OR new OR insider OR reporter OR paid OR money OR revenue)";
   return [sourceQuery, aiTerms, signalTerms, "-is:retweet", "lang:en"].filter(Boolean).join(" ");
+}
+
+export function buildBroadAiAlphaQueries(extraTerms: string[] = []) {
+  const baseQueries = [
+    `("new AI model" OR "new LLM" OR "open weights" OR "reasoning model") (released OR launch OR available OR benchmark) -is:retweet lang:en`,
+    `(agent OR agents OR "AI agent" OR Codex OR Cursor) (workflow OR automation OR revenue OR paid OR "open source") -is:retweet lang:en`,
+    `(AI OR LLM OR AGI) ("just shipped" OR "quietly launched" OR "early access" OR "waitlist" OR "paper") -is:retweet lang:en`,
+  ];
+  return [...baseQueries, ...extraTerms.map((term) => term.trim()).filter(Boolean)];
+}
+
+export function buildAiAlphaQueryPlan(handles: string[], extraBroadTerms: string[] = []): SearchQueryPlan {
+  const sourceQuery = buildRecentAiAlphaQuery(handles);
+  const broadQueries = buildBroadAiAlphaQueries(extraBroadTerms);
+  return {
+    sourceQuery,
+    broadQueries,
+    combinedForReport: [sourceQuery, ...broadQueries].join("\n---\n"),
+  };
 }

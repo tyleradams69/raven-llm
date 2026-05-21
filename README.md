@@ -11,6 +11,7 @@ This is not an auto-poster. It is a discovery and drafting system. You review be
 ## What it does
 
 - Searches recent X posts from a curated AI source list.
+- Searches broad X discovery queries for early AI-alpha beyond known accounts.
 - Scores each post for:
   - source quality
   - freshness
@@ -94,7 +95,8 @@ npm run lint     # ESLint
 AI_ALPHA_SCAN_LIMIT=25
 AI_ALPHA_MIN_SCORE=60
 AI_ALPHA_OUTPUT_DIR=.data/runs
-AI_ALPHA_SEED_HANDLES=Chrisgpt,sama,karpathy,OpenAI,AnthropicAI,GoogleDeepMind,MetaAI,perplexity_ai,huggingface,cursor_ai,swyx
+AI_ALPHA_SEED_HANDLES=sama,karpathy,OpenAI,AnthropicAI,GoogleDeepMind,MetaAI,perplexity_ai,huggingface,cursor_ai,swyx
+AI_ALPHA_EXTRA_BROAD_QUERIES="new AI model" "early access" -is:retweet lang:en||"open weights" "just shipped" AI -is:retweet lang:en
 TELEGRAM_ENABLED=false
 TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_CHAT_ID=your-chat-id
@@ -145,13 +147,15 @@ If high-score signals are found, Telegram receives a compact digest with source 
 
 The current default list prioritizes:
 
-- AI insider/reporter format: Chrisgpt
 - primary labs: OpenAI, Anthropic, Google DeepMind, Meta AI
 - researchers/operators: Karpathy, LeCun, swyx, nearcyan
 - AI builders/infra: Hugging Face, vLLM, Perplexity, Cursor, Vercel
 - investor/market thesis: a16z
+- broad X search-page style discovery queries for unknown early accounts
 
-Add more sources in `src/sources.ts` as you discover accounts that consistently break useful AI news early.
+Chrisgpt is not scanned as a source by default. His page is only a format/style reference for fast, useful AI-insider packaging.
+
+Add more sources in `src/sources.ts` as you discover accounts that consistently break useful AI news early. Add broad search terms with `AI_ALPHA_EXTRA_BROAD_QUERIES`, separated by `||`.
 
 ## Next obvious upgrades
 

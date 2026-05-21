@@ -1,4 +1,4 @@
-export type AlphaSourceTier = "primary-lab" | "insider-reporter" | "researcher" | "builder" | "infra" | "investor" | "aggregator" | "unknown";
+export type AlphaSourceTier = "primary-lab" | "researcher" | "builder" | "infra" | "investor" | "aggregator" | "unknown";
 
 export type AlphaSource = {
   handle: string;
@@ -39,7 +39,6 @@ export type TweetDraft = {
 
 export const defaultSources: AlphaSource[] = [
   { handle: "sama", name: "Sam Altman", tier: "primary-lab", weight: 9, notes: "OpenAI direction / hints" },
-  { handle: "Chrisgpt", name: "Chris", tier: "insider-reporter", weight: 8, notes: "AI insider/reporter format inspiration: practical AI operator stories, early Codex/agent monetization signals, mainstream AI news framing" },
   { handle: "OpenAI", tier: "primary-lab", weight: 10, notes: "model/product launches" },
   { handle: "AnthropicAI", tier: "primary-lab", weight: 10, notes: "Claude launches/research" },
   { handle: "GoogleDeepMind", tier: "primary-lab", weight: 9, notes: "frontier research" },

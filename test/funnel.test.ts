@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { renderVoiceBrief } from "../src/profile.js";
 import { loadEnvFiles } from "../src/env.js";
 import { rankAlpha, scoreAlphaPost } from "../src/scoring.js";
-import { buildRecentAiAlphaQuery, parseXurlSearch } from "../src/x-client.js";
+import { buildAiAlphaQueryPlan, buildBroadAiAlphaQueries, buildRecentAiAlphaQuery, parseXurlSearch } from "../src/x-client.js";
 import { renderReport } from "../src/scan.js";
 import { buildTelegramDigest, sendTelegramMessage } from "../src/telegram.js";
 
@@ -78,6 +78,18 @@ describe("X client helpers", () => {
     expect(query).toContain("from:OpenAI");
     expect(query).toContain("from:karpathy");
     expect(query).toContain("-is:retweet");
+  });
+
+  it("builds broad search-page style discovery queries", () => {
+    const broad = buildBroadAiAlphaQueries(["\"AI agent\" \"quietly launched\" -is:retweet lang:en"]);
+    expect(broad.length).toBeGreaterThan(3);
+    expect(broad.join(" ")).toContain("open weights");
+    expect(broad.at(-1)).toContain("quietly launched");
+
+    const plan = buildAiAlphaQueryPlan(["OpenAI"], broad.slice(0, 1));
+    expect(plan.sourceQuery).toContain("from:OpenAI");
+    expect(plan.broadQueries.length).toBeGreaterThan(0);
+    expect(plan.combinedForReport).toContain("---");
   });
 
   it("parses xurl recent-search JSON", () => {

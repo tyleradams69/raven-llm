@@ -5,7 +5,7 @@ import { renderVoiceBrief } from "./profile.js";
 import { rankAlpha } from "./scoring.js";
 import { defaultSources, type ScoredAlpha, type XPost } from "./sources.js";
 import { buildTelegramDigest, sendTelegramMessage } from "./telegram.js";
-import { BearerSearchClient, buildRecentAiAlphaQuery, XurlClient, type XSearchClient } from "./x-client.js";
+import { BearerSearchClient, buildAiAlphaQueryPlan, XurlClient, type XSearchClient } from "./x-client.js";
 
 function env(name: string, fallback = "") {
   return process.env[name]?.trim() || fallback;
@@ -15,6 +15,29 @@ function seedHandles() {
   const configured = env("AI_ALPHA_SEED_HANDLES");
   if (configured) return configured.split(",").map((handle) => handle.trim().replace(/^@/, "")).filter(Boolean);
   return defaultSources.map((source) => source.handle);
+}
+
+function extraBroadQueries() {
+  return env("AI_ALPHA_EXTRA_BROAD_QUERIES")
+    .split("\n")
+    .flatMap((line) => line.split("||"))
+    .map((query) => query.trim())
+    .filter(Boolean);
+}
+
+function uniquePosts(posts: XPost[]) {
+  const seen = new Set<string>();
+  return posts.filter((post) => {
+    const key = post.id || `${post.authorHandle}:${post.text}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+async function searchMany(client: XSearchClient, queries: string[], limit: number) {
+  const batches = await Promise.all(queries.map((query) => client.search(query, limit)));
+  return uniquePosts(batches.flat());
 }
 
 function makeClient(): XSearchClient {
@@ -28,16 +51,16 @@ function fallbackPosts(): XPost[] {
   return [
     {
       id: "sample-0",
-      authorHandle: "Chrisgpt",
-      authorName: "Chris",
-      text: "Codex has officially paid for itself on the $100 plan. Asked it to find paid open-source tasks, pick the real ones, write code, open PRs, and handle maintainer feedback.",
+      authorHandle: "ai_builder_lab",
+      authorName: "AI Builder Lab",
+      text: "Quietly launched: a small open-source agent framework that turns GitHub issues into tested PRs with eval logs attached. Early users are reporting paid bounty completions.",
       createdAt: new Date(now.getTime() - 30 * 60_000).toISOString(),
-      likeCount: 2579,
-      repostCount: 154,
-      replyCount: 135,
-      quoteCount: 80,
-      viewCount: 439_050,
-      url: "https://x.com/Chrisgpt/status/sample-0",
+      likeCount: 579,
+      repostCount: 84,
+      replyCount: 35,
+      quoteCount: 20,
+      viewCount: 89_050,
+      url: "https://x.com/ai_builder_lab/status/sample-0",
     },
     {
       id: "sample-1",
@@ -101,13 +124,15 @@ export async function runScan(client?: XSearchClient) {
   const limit = Number(env("AI_ALPHA_SCAN_LIMIT", "25"));
   const minScore = Number(env("AI_ALPHA_MIN_SCORE", "60"));
   const handles = seedHandles();
-  const query = buildRecentAiAlphaQuery(handles);
+  const queryPlan = buildAiAlphaQueryPlan(handles, extraBroadQueries());
+  const query = queryPlan.combinedForReport;
+  const queries = [queryPlan.sourceQuery, ...queryPlan.broadQueries];
   const searchClient = client ?? makeClient();
   let posts: XPost[];
   let mode = "live";
 
   try {
-    posts = await searchClient.search(query, limit);
+    posts = await searchMany(searchClient, queries, limit);
   } catch (error) {
     mode = "sample-fallback";
     posts = fallbackPosts();
@@ -121,7 +146,7 @@ export async function runScan(client?: XSearchClient) {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const jsonPath = join(outputDir, `${stamp}.json`);
   const mdPath = join(outputDir, `${stamp}.md`);
-  await writeFile(jsonPath, JSON.stringify({ mode, query, scanned: posts.length, qualified, ranked }, null, 2));
+  await writeFile(jsonPath, JSON.stringify({ mode, query, queries, scanned: posts.length, qualified, ranked }, null, 2));
   await writeFile(mdPath, renderReport(qualified.length ? qualified : ranked.slice(0, 10)));
 
   const telegramMinScore = Number(env("TELEGRAM_MIN_SCORE", String(minScore)));
@@ -138,7 +163,7 @@ export async function runScan(client?: XSearchClient) {
     maxItems: telegramMaxItems,
   }, telegramDigest);
 
-  return { mode, query, scanned: posts.length, qualified: qualified.length, top: ranked[0], jsonPath, mdPath, telegram };
+  return { mode, query, queries, scanned: posts.length, qualified: qualified.length, top: ranked[0], jsonPath, mdPath, telegram };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
