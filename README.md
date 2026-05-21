@@ -1,18 +1,20 @@
-# X AI Alpha Funnel
+# ravenLLM
 
-Hermes-friendly funnel for Tyler's X account: scan X for early AI alpha, rank what matters, and produce tweet-ready angles before the AI/news timeline gets crowded.
+Hermes-powered X intelligence funnel for Tyler's AI account.
+
+ravenLLM watches X for early AI alpha, ranks what matters, and turns the best signals into tweet-ready angles. The positioning is inspired by the Chrisgpt-style lane: AI insider/reporter energy, practical operator stories, Codex/agent monetization experiments, and early AI news packaged before it becomes obvious timeline consensus.
 
 This is not an auto-poster. It is a discovery and drafting system. You review before tweeting.
 
 ## What it does
 
-- Searches X recent posts from a curated AI source list.
+- Searches recent X posts from a curated AI source list.
 - Scores each post for:
   - source quality
   - freshness
   - engagement acceleration
   - AI-native keywords
-  - launch/research/product signals
+  - launch/research/product/operator signals
   - rumor/leak risk
 - Classifies signals as:
   - `tweet-now`
@@ -23,6 +25,19 @@ This is not an auto-poster. It is a discovery and drafting system. You review be
   - thread hook
   - quote-tweet take
 - Writes Markdown and JSON reports to `.data/runs/`.
+
+## Voice / content lane
+
+ravenLLM should bias toward posts that can become:
+
+- "AI insider/reporter" summaries
+- practical operator takes, especially agent/Codex workflows
+- "this tool paid for itself" or "this changed my workflow" narratives
+- early lab/model/product launches
+- research that has an obvious builder or business implication
+- AI app-stack changes before everyone else packages them
+
+Avoid copying another creator's wording. Use the lane as inspiration: fast, credible, practical, and useful.
 
 ## Quick start
 
@@ -66,7 +81,7 @@ npm run lint     # ESLint
 AI_ALPHA_SCAN_LIMIT=25
 AI_ALPHA_MIN_SCORE=60
 AI_ALPHA_OUTPUT_DIR=.data/runs
-AI_ALPHA_SEED_HANDLES=sama,karpathy,OpenAI,AnthropicAI,GoogleDeepMind,MetaAI,perplexity_ai,huggingface
+AI_ALPHA_SEED_HANDLES=Chrisgpt,sama,karpathy,OpenAI,AnthropicAI,GoogleDeepMind,MetaAI,perplexity_ai,huggingface,cursor_ai,swyx
 ```
 
 ## Output
@@ -84,6 +99,7 @@ The Markdown report is the operator-friendly view. Open the latest `.md` and pic
 
 The current default list prioritizes:
 
+- AI insider/reporter format: Chrisgpt
 - primary labs: OpenAI, Anthropic, Google DeepMind, Meta AI
 - researchers/operators: Karpathy, LeCun, swyx, nearcyan
 - AI builders/infra: Hugging Face, vLLM, Perplexity, Cursor, Vercel

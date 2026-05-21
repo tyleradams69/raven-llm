@@ -1,10 +1,10 @@
 import type { ScoredAlpha, TweetDraft, XPost } from "./sources.js";
 import { defaultSources, sourceMap } from "./sources.js";
 
-const breakingTerms = ["launch", "released", "announcing", "introducing", "new model", "available", "open weights", "api", "benchmark", "sota", "frontier", "agent", "reasoning", "multimodal", "voice", "video", "robotics"];
+const breakingTerms = ["launch", "released", "announcing", "introducing", "new model", "available", "open weights", "api", "benchmark", "sota", "frontier", "agent", "agents", "agi", "codex", "reasoning", "multimodal", "voice", "video", "robotics", "insider", "reporter"];
 const researchTerms = ["paper", "arxiv", "research", "eval", "benchmark", "scaling", "training", "inference", "post-training", "rl", "distillation"];
-const productTerms = ["users", "shipping", "app", "feature", "beta", "waitlist", "developer", "sdk", "pricing", "enterprise"];
-const riskTerms = ["rumor", "unconfirmed", "leak", "maybe", "heard", "insider", "not financial", "giveaway", "airdrop"];
+const productTerms = ["users", "shipping", "app", "feature", "beta", "waitlist", "developer", "sdk", "pricing", "enterprise", "codex", "cursor", "agent", "agents", "workflow"];
+const riskTerms = ["unconfirmed", "leak", "maybe", "heard", "giveaway", "airdrop"];
 
 function includesAny(text: string, terms: string[]) {
   const lower = text.toLowerCase();
@@ -58,15 +58,15 @@ export function buildTweetDrafts(post: XPost, category: ScoredAlpha["category"],
   return [
     {
       format: "single",
-      text: truncate(`Early AI alpha: ${subject} just posted ${category === "research" ? "a research signal" : category === "product" ? "a product signal" : "a notable signal"}.\n\nWhy it matters: ${why}.\n\nMy read: this is worth tracking before it becomes the obvious CT narrative.${url}`),
+      text: truncate(`ravenLLM signal: ${subject} just posted ${category === "research" ? "a research signal" : category === "product" ? "a practical AI/operator signal" : "a notable AI signal"}.\n\nWhy it matters: ${why}.\n\nMy read: this is the kind of AI alpha worth catching before it becomes the obvious timeline narrative.${url}`),
     },
     {
       format: "thread-hook",
-      text: truncate(`This could be one of the more important AI updates today.\n\nSignal: ${quote}\n\nWhat I’m watching next:\n1. who builds on it\n2. whether devs adopt it\n3. if it changes the AI app stack${url}`),
+      text: truncate(`This could be one of the more important AI updates today.\n\nSignal: ${quote}\n\nWhat I’m watching next:\n1. does this make agents more useful?\n2. can builders turn it into revenue/workflow leverage?\n3. who copies it first?${url}`),
     },
     {
       format: "quote-tweet",
-      text: truncate(`Important AI signal here.\n\nThe edge is not just the announcement — it’s spotting which builders/researchers move first after this.`),
+      text: truncate(`Important AI signal here.\n\nThe edge is not only the announcement — it’s spotting the practical operator angle before everyone else packages it.`),
     },
   ];
 }
@@ -107,7 +107,7 @@ export function scoreAlphaPost(post: XPost, options: { now?: Date; minScore?: nu
     score += 8;
     reasons.push("product/dev adoption angle");
   }
-  if (/\b(ai|llm|agent|model|inference|open source|open-weight|multimodal|reasoning)\b/i.test(post.text)) {
+  if (/\b(ai|agi|llm|agent|agents|codex|model|inference|open source|open-weight|multimodal|reasoning)\b/i.test(post.text)) {
     score += 8;
     reasons.push("AI-native keyword match");
   }

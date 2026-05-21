@@ -1,7 +1,7 @@
 {
-  "name": "x-ai-alpha-funnel",
+  "name": "ravenllm",
   "version": "1.0.0",
-  "description": "",
+  "description": "Hermes-powered X intelligence funnel for early AI alpha and tweet drafting.",
   "main": "index.js",
   "scripts": {
     "test": "vitest run",

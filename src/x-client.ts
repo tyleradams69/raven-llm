@@ -77,7 +77,7 @@ export class BearerSearchClient implements XSearchClient {
 
 export function buildRecentAiAlphaQuery(handles: string[]) {
   const sourceQuery = handles.length ? `(${handles.map((handle) => `from:${handle.replace(/^@/, "")}`).join(" OR ")})` : "";
-  const aiTerms = "(AI OR LLM OR model OR agents OR inference OR OpenAI OR Anthropic OR DeepMind OR Claude OR GPT OR llama OR multimodal OR reasoning)";
-  const signalTerms = "(launch OR released OR announcing OR paper OR benchmark OR open-source OR API OR new)";
+  const aiTerms = "(AI OR AGI OR LLM OR model OR agents OR inference OR OpenAI OR Anthropic OR DeepMind OR Claude OR GPT OR llama OR multimodal OR reasoning OR Codex OR Cursor)";
+  const signalTerms = "(launch OR released OR announcing OR paper OR benchmark OR open-source OR API OR new OR insider OR reporter OR paid OR money OR revenue)";
   return [sourceQuery, aiTerms, signalTerms, "-is:retweet", "lang:en"].filter(Boolean).join(" ");
 }

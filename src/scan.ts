@@ -24,6 +24,19 @@ function fallbackPosts(): XPost[] {
   const now = new Date();
   return [
     {
+      id: "sample-0",
+      authorHandle: "Chrisgpt",
+      authorName: "Chris",
+      text: "Codex has officially paid for itself on the $100 plan. Asked it to find paid open-source tasks, pick the real ones, write code, open PRs, and handle maintainer feedback.",
+      createdAt: new Date(now.getTime() - 30 * 60_000).toISOString(),
+      likeCount: 2579,
+      repostCount: 154,
+      replyCount: 135,
+      quoteCount: 80,
+      viewCount: 439_050,
+      url: "https://x.com/Chrisgpt/status/sample-0",
+    },
+    {
       id: "sample-1",
       authorHandle: "OpenAI",
       authorName: "OpenAI",
@@ -55,7 +68,7 @@ function fallbackPosts(): XPost[] {
 export function renderReport(items: ScoredAlpha[]) {
   const top = items.slice(0, 10);
   return [
-    `# X AI Alpha Funnel Run`,
+    `# ravenLLM Intelligence Run`,
     ``,
     `Generated: ${new Date().toISOString()}`,
     ``,
