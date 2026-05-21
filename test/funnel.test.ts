@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { renderVoiceBrief } from "../src/profile.js";
 import { rankAlpha, scoreAlphaPost } from "../src/scoring.js";
 import { buildRecentAiAlphaQuery, parseXurlSearch } from "../src/x-client.js";
 import { renderReport } from "../src/scan.js";
@@ -77,6 +78,16 @@ describe("report rendering", () => {
     const scored = scoreAlphaPost({ id: "1", authorHandle: "OpenAI", text: "Announcing new AI API", createdAt: now.toISOString() }, { now });
     const report = renderReport([scored]);
     expect(report).toContain("Top signals");
+    expect(report).toContain("Account voice brief");
+    expect(report).toContain("Ignore old content");
     expect(report).toContain("Drafts:");
+  });
+
+  it("renders the RavenLLM account brief and excludes old niche style", () => {
+    const brief = renderVoiceBrief();
+    expect(brief).toContain("@RavenLLM");
+    expect(brief).toContain("AI investigative journalist");
+    expect(brief).toContain("good morning");
+    expect(brief).toContain("giveaway");
   });
 });

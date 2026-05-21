@@ -1,8 +1,10 @@
 # ravenLLM
 
-Hermes-powered X intelligence funnel for Tyler's AI account.
+Hermes-powered X intelligence funnel for Tyler's @RavenLLM AI account.
 
-ravenLLM watches X for early AI alpha, ranks what matters, and turns the best signals into tweet-ready angles. The positioning is inspired by the Chrisgpt-style lane: AI insider/reporter energy, practical operator stories, Codex/agent monetization experiments, and early AI news packaged before it becomes obvious timeline consensus.
+ravenLLM watches X for early AI alpha, ranks what matters, and turns the best signals into tweet-ready angles for `https://x.com/RavenLLM`. The live account positioning is: "ASI 2028 | Most valuable insider AI information on X first | AI investigative journalism and AI history archivist."
+
+Important: the account has older posts from a previous niche, including giveaway / good-morning / engagement-style posts. Those are explicitly not the target style for future ravenLLM output.
 
 This is not an auto-poster. It is a discovery and drafting system. You review before tweeting.
 
@@ -28,6 +30,12 @@ This is not an auto-poster. It is a discovery and drafting system. You review be
 
 ## Voice / content lane
 
+Target account: `https://x.com/RavenLLM`
+
+Current bio:
+
+> ASI 2028 | Most valuable insider AI information on X first | AI investigative journalism and AI history archivist.
+
 ravenLLM should bias toward posts that can become:
 
 - "AI insider/reporter" summaries
@@ -38,6 +46,8 @@ ravenLLM should bias toward posts that can become:
 - AI app-stack changes before everyone else packages them
 
 Avoid copying another creator's wording. Use the lane as inspiration: fast, credible, practical, and useful.
+
+Do not train the voice on the account's old non-AI niche posts. Specifically ignore old GM posts, giveaway posts, shill/follow/repost mechanics, and generic engagement-farming content.
 
 ## Quick start
 

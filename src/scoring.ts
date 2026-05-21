@@ -1,3 +1,4 @@
+import { ravenVoiceProfile } from "./profile.js";
 import type { ScoredAlpha, TweetDraft, XPost } from "./sources.js";
 import { defaultSources, sourceMap } from "./sources.js";
 
@@ -58,15 +59,15 @@ export function buildTweetDrafts(post: XPost, category: ScoredAlpha["category"],
   return [
     {
       format: "single",
-      text: truncate(`ravenLLM signal: ${subject} just posted ${category === "research" ? "a research signal" : category === "product" ? "a practical AI/operator signal" : "a notable AI signal"}.\n\nWhy it matters: ${why}.\n\nMy read: this is the kind of AI alpha worth catching before it becomes the obvious timeline narrative.${url}`),
+      text: truncate(`Raven signal: ${subject} just posted ${category === "research" ? "a research signal" : category === "product" ? "a practical AI/operator signal" : "a notable AI signal"}.\n\nWhy it matters: ${why}.\n\nMy read: this fits the ${ravenVoiceProfile.displayName} lane — valuable AI information early, with the practical angle before it becomes the obvious timeline narrative.${url}`),
     },
     {
       format: "thread-hook",
-      text: truncate(`This could be one of the more important AI updates today.\n\nSignal: ${quote}\n\nWhat I’m watching next:\n1. does this make agents more useful?\n2. can builders turn it into revenue/workflow leverage?\n3. who copies it first?${url}`),
+      text: truncate(`This is exactly the kind of AI information I want to catch early.\n\nSignal: ${quote}\n\nWhat I’m watching next:\n1. does this change the agent/tooling stack?\n2. can builders turn it into leverage or revenue?\n3. does it become part of the AI history archive later?${url}`),
     },
     {
       format: "quote-tweet",
-      text: truncate(`Important AI signal here.\n\nThe edge is not only the announcement — it’s spotting the practical operator angle before everyone else packages it.`),
+      text: truncate(`Important AI signal.\n\nThe edge is not only knowing it happened — it’s understanding why it matters before the rest of the timeline packages it.`),
     },
   ];
 }

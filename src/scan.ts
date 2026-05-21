@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { renderVoiceBrief } from "./profile.js";
 import { rankAlpha } from "./scoring.js";
 import { defaultSources, type ScoredAlpha, type XPost } from "./sources.js";
 import { BearerSearchClient, buildRecentAiAlphaQuery, XurlClient, type XSearchClient } from "./x-client.js";
@@ -71,6 +72,9 @@ export function renderReport(items: ScoredAlpha[]) {
     `# ravenLLM Intelligence Run`,
     ``,
     `Generated: ${new Date().toISOString()}`,
+    ``,
+    `## Account voice brief`,
+    renderVoiceBrief(),
     ``,
     `## Top signals`,
     ...top.flatMap((item, index) => [
