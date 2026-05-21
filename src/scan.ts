@@ -155,15 +155,20 @@ export async function runScan(client?: XSearchClient) {
     minScore: telegramMinScore,
     maxItems: telegramMaxItems,
   });
+  const allowSampleFallbackTelegram = env("TELEGRAM_SEND_SAMPLE_FALLBACK", "false").toLowerCase() === "true";
+  const telegramEnabled = env("TELEGRAM_ENABLED", "false").toLowerCase() === "true" && (mode === "live" || allowSampleFallbackTelegram);
   const telegram = await sendTelegramMessage({
-    enabled: env("TELEGRAM_ENABLED", "false").toLowerCase() === "true",
+    enabled: telegramEnabled,
     botToken: env("TELEGRAM_BOT_TOKEN"),
     chatId: env("TELEGRAM_CHAT_ID"),
     minScore: telegramMinScore,
     maxItems: telegramMaxItems,
   }, telegramDigest);
+  const telegramResult = mode === "live" || allowSampleFallbackTelegram
+    ? telegram
+    : { ...telegram, reason: "sample-fallback-not-sent" };
 
-  return { mode, query, queries, scanned: posts.length, qualified: qualified.length, top: ranked[0], jsonPath, mdPath, telegram };
+  return { mode, query, queries, scanned: posts.length, qualified: qualified.length, top: ranked[0], jsonPath, mdPath, telegram: telegramResult };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

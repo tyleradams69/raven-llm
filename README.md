@@ -102,6 +102,7 @@ TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_CHAT_ID=your-chat-id
 TELEGRAM_MIN_SCORE=70
 TELEGRAM_MAX_ITEMS=5
+TELEGRAM_SEND_SAMPLE_FALLBACK=false
 ```
 
 ## Output
@@ -132,6 +133,7 @@ TELEGRAM_BOT_TOKEN=...
 TELEGRAM_CHAT_ID=...
 TELEGRAM_MIN_SCORE=70
 TELEGRAM_MAX_ITEMS=5
+TELEGRAM_SEND_SAMPLE_FALLBACK=false
 ```
 
 Then run:
@@ -141,6 +143,8 @@ npm run scan
 ```
 
 If high-score signals are found, Telegram receives a compact digest with source link, reasons, risk flags, and a tweet draft.
+
+By default, Telegram only sends live X results. If X API search fails and ravenLLM uses sample fallback data, Telegram stays quiet unless you explicitly set `TELEGRAM_SEND_SAMPLE_FALLBACK=true`.
 
 
 ## Source strategy
