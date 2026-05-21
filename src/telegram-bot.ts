@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { loadEnvFiles } from "./env.js";
-import { buildTweetIdeas } from "./tweet-ideas.js";
+import { buildContentCalendar, buildHookIdeas, buildQuoteTake, buildThreadIdea, buildTweetIdeas, rewriteDraft, scoreDraft } from "./tweet-ideas.js";
 import { sendTelegramMessage } from "./telegram.js";
 
 type TelegramUpdate = {
@@ -47,7 +47,12 @@ function helpText() {
     "",
     "/ideas — get evergreen Raven tweet ideas",
     "/ideas agents — get ideas around a topic",
-    "/ideas open source models — topic-specific angles",
+    "/thread AI agents — draft a short thread",
+    "/hook inference costs — generate hooks",
+    "/quote <text/url> — generate quote-tweet takes",
+    "/rewrite <draft> — make a draft sharper",
+    "/score <draft> — score/improve a draft",
+    "/calendar — 7-day content mix",
     "/help — show commands",
     "",
     "These are for engagement + positioning, not only breaking alpha.",
@@ -58,7 +63,13 @@ export function buildBotReply(text: string) {
   const normalized = text.trim();
   if (/^\/help/i.test(normalized) || /^\/start/i.test(normalized)) return helpText();
   if (/^\/(ideas|idea|tweets|tweetideas)(@\w+)?(\s|$)/i.test(normalized)) return buildTweetIdeas(normalized);
-  return "Send /ideas or /ideas <topic>. Example: /ideas AI agents";
+  if (/^\/thread(@\w+)?(\s|$)/i.test(normalized)) return buildThreadIdea(normalized);
+  if (/^\/hook(@\w+)?(\s|$)/i.test(normalized)) return buildHookIdeas(normalized);
+  if (/^\/quote(@\w+)?(\s|$)/i.test(normalized)) return buildQuoteTake(normalized);
+  if (/^\/rewrite(@\w+)?(\s|$)/i.test(normalized)) return rewriteDraft(normalized);
+  if (/^\/score(@\w+)?(\s|$)/i.test(normalized)) return scoreDraft(normalized);
+  if (/^\/calendar(@\w+)?(\s|$)/i.test(normalized)) return buildContentCalendar();
+  return "Send /ideas, /thread, /hook, /quote, /rewrite, /score, or /calendar. Example: /ideas AI agents";
 }
 
 export async function pollTelegramOnce(fetcher: typeof fetch = fetch) {

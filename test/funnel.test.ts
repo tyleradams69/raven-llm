@@ -9,7 +9,7 @@ import { buildAiAlphaQueryPlan, buildBroadAiAlphaQueries, buildRecentAiAlphaQuer
 import { renderReport } from "../src/scan.js";
 import { buildTelegramDigest, sendTelegramMessage } from "../src/telegram.js";
 import { buildBotReply } from "../src/telegram-bot.js";
-import { buildTweetIdeas } from "../src/tweet-ideas.js";
+import { buildTweetIdeas, buildThreadIdea, buildHookIdeas, buildQuoteTake, rewriteDraft, scoreDraft, buildContentCalendar } from "../src/tweet-ideas.js";
 
 const now = new Date("2026-05-21T12:00:00.000Z");
 
@@ -188,5 +188,23 @@ describe("Telegram tweet idea bot", () => {
     expect(buildBotReply("/help")).toContain("ravenLLM bot commands");
     expect(buildBotReply("/ideas open source models")).toContain("open source models");
     expect(buildBotReply("hello")).toContain("Send /ideas");
+  });
+
+  it("builds thread, hook, quote, rewrite, score, and calendar outputs", () => {
+    expect(buildThreadIdea("/thread AI agents")).toContain("Thread: AI agents");
+    expect(buildHookIdeas("/hook inference costs")).toContain("Hooks for: inference costs");
+    expect(buildQuoteTake("/quote OpenAI released a new coding model")).toContain("Quote take");
+    expect(rewriteDraft("/rewrite AI agents are useful")).toContain("Rewrite options");
+    expect(scoreDraft("/score AI agents are useful because they compress busywork")).toContain("Tweet score");
+    expect(buildContentCalendar()).toContain("7-day Raven content calendar");
+  });
+
+  it("routes Telegram content commands", () => {
+    expect(buildBotReply("/thread AI agents")).toContain("Thread: AI agents");
+    expect(buildBotReply("/hook AGI timelines")).toContain("Hooks for: AGI timelines");
+    expect(buildBotReply("/quote this tool changed my workflow")).toContain("Quote take");
+    expect(buildBotReply("/rewrite AI is moving fast")).toContain("Rewrite options");
+    expect(buildBotReply("/score AI is moving fast")).toContain("Tweet score");
+    expect(buildBotReply("/calendar")).toContain("7-day Raven content calendar");
   });
 });

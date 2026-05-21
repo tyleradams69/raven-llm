@@ -163,7 +163,12 @@ Send the bot:
 ```text
 /ideas
 /ideas AI agents
-/ideas open source models
+/thread AI agents
+/hook inference costs
+/quote <text or source URL>
+/rewrite <draft>
+/score <draft>
+/calendar
 /help
 ```
 
